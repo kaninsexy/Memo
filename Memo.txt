@@ -22,3 +22,78 @@ create({ task: 'google' });
 // ข้อูดีของ JWT
 // 1.ไม่ต้องเก็บข้อมูมูลใน DataBase
 // 2.Scalable
+
+
+
+npm i express cors sequelize bcryptjs dotenv jsonwebtoken mysql2 passport passport-jwt
+npm i -g sequelize-cli
+1. import express,cors
+2. สร้าง  app = express() 
+3. app.use cor express.json() express.urlencoded({extended:false})
+====> เป็น middleware
+====> express.json ทำให้ใช้ body แบบ json ได้ จะได้ใช้ req.body ได้
+====> cors ทำให้ user ยิงได้
+=====> extended:false ใน express.urlencoded
+4. app.listen
+5. ใน terminal พิม sequelize-cli inti:config
+6. แก้ config.json รหัสผ่าน
+8. ใน terminal พิม sequelize-cli db:create
+====> สร้าง database
+7. ใน terminal พิม sequelize-cli init:models
+====> สร้าง models folder
+8. สร้าง ToDoList.js User.js ใน folder models
+====> เพือตั้งค่า models
+9. ใน ToDoList.js ใน models
+==========================================================
+module.exports = (sequelize, DataTypes) => {
+  const TodoList = sequelize.define(
+    'todo',
+    { task: { unique: true, allowNull: false, type: DataTypes.STRING } },
+    { tableName: 'todolists', timestamps: false }
+  );
+  return TodoList;
+};
+=========================================================
+
+10. ใน index.js import db จาก ./models จากนั้น 
+db.sequelize.sync().then(() => {
+  console.log('Connect Models to my Database');
+});
+===========>เป็นการ sync table ใส่ database  ที่เราสร้าง
+
+11. สร้าง todoList.js user.js ใน routes แล้วเชื่อม routes
+12. ใน models Users กำหนดความสัมพันธ์ eg  User.associate = (models) => {
+    User.hasMany(models.todo, { foreignKey: 'user_id' });
+  };
+  ใน model TodoList
+==========================================================
+  module.exports = (sequelize, DataTypes) => {
+  const TodoList = sequelize.define(
+    'todo',
+    { task: { unique: true, allowNull: false, type: DataTypes.STRING } },
+    { tableName: 'todolists', timestamps: false }
+  );
+  TodoList.associate = (models) => {
+    TodoList.belongsTo(models.User, { foreignKey: 'user_id' });
+  };
+  return TodoList;
+};
+==========================================================
+
+13. ใน controllers 
+==========================================================
+const db = require('../models');
+const bc = require('bcryptjs');
+
+const login = (req, res) => {};
+
+const register = async (req, res) => {
+  const { username, password, name } = req.body;
+  const targetUser = await db.User.findOne({ where: { username } });
+  if (targetUser) {
+    res.status(400).send({ message: 'Username has already been Taken' });
+  } else {
+    const salt = bc.genSaltSync(Number(process.env.SALT_ROUND));
+  }
+};
+==========================================================
